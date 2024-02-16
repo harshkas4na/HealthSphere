@@ -8,7 +8,8 @@ const UserSchema=new mongoose.Schema({
     },
     email:{
         type:String,
-        required:true
+        required:true,
+        unique: true
     },
     password:{
         type:String,
@@ -34,6 +35,23 @@ UserSchema.methods.createHash = async function (plainTextPassword) {
     return await bcrypt.compare(candidatePassword, this.password);
   };
 
+
+
+
 const User=mongoose.model('User',UserSchema);
 
-module.exports={User};
+module.exports=User;
+
+
+
+
+
+// UserSchema.pre('save', async function (next) {
+//     if (this.isModified('password')) {
+//       const saltRounds = 10;
+//       const salt = await bcrypt.genSalt(saltRounds);
+//       this.password = await bcrypt.hash(this.password, salt);
+//     }
+//     next();
+//   });
+// With this middleware, every time a user document is saved or updated, it will automatically hash the password if it has been modified.

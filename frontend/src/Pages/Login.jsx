@@ -20,16 +20,29 @@ const LoginForm = () => {
       body:JSON.stringify({email,password}),
       headers:{
         'Content-Type':'application/json',
-        'authorization':`Bearer ${window.localStorage.token}`
       }
 
     })
-    const data = await response.json(); // Parse response JSON
     
-    if(data.success){ // Check if login was successful
-      navigate('/Home');
-      // setloggedIn(true);
+    const data = await response.json();
+    window.localStorage.token=data.token;
+    if(!data.success){
+      localStorage.setItem('user', JSON.stringify(null));
     }
+    else{
+      localStorage.setItem('user', JSON.stringify(data.user));
+    }
+    console.log(data);
+    if(!data.success){
+      if(data.reason==="1"){
+        alert("You do not have a account");
+      }
+      else if(data.reason==="2"){
+        alert("You entered wrong password");
+      }
+      return;
+    }
+    navigate('/Home');
   };
 
   return (

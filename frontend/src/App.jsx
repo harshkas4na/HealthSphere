@@ -3,7 +3,7 @@ import { BrowserRouter,Routes,Route } from "react-router-dom";
 import Home from './Pages/Home';
 import AboutUs from './Pages/AboutUs';
 import Analytics from './Pages/Analytics';
-import Communities from './Pages/Communities';
+import CommunityPage from './Pages/Communities';
 import DiseaseAwareness from './Pages/DiseaseAwareness';
 import Location from './Pages/Location';
 import Login from './Pages/Login';
@@ -18,12 +18,14 @@ import Tutorials from './Pages/Yoga/frontend/src/pages/Tutorials/Tutorials';
 
 
 
-import { useState } from 'react';
 
 const App = () => {
-  // const [isloggedIn,setloggedIn]=useState(false);
+  
+  
+  
   return (
     <div>
+      
       <BrowserRouter>
         <Routes>
           
@@ -35,9 +37,9 @@ const App = () => {
           
           <Route path="/AboutUs" element={<AboutUs/>}/>
           <Route path="/analytics" element={<Analytics/>}/>
-          <Route path="/communities" element={<Communities/>}/>
+          <Route path="/communities" element={<CommunityPage/>}/>
           <Route path="/diseaseAwareness" element={<DiseaseAwareness/>}/>
-          <Route path="/location" element={<Location/>}/>
+          <Route path="/locations" element={<Location/>}/>
           <Route path="/login" element={<Login  />} />
           <Route path="/signup" element={<Signup/>}/>
           <Route path="/personlizedDiet" element={<PersonlizedDiet/>}/>
@@ -52,6 +54,7 @@ const App = () => {
           
         </Routes>
       </BrowserRouter>
+      
     </div>
   )
 }

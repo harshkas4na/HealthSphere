@@ -1,11 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import { useNavigate,Link } from 'react-router-dom';
+// import { useRecoilState,RecoilRoot } from 'recoil';
+// import { userState } from '../store/atoms/user';
+// import {useUserContext} from "../contexts/userContextProvider";
 
 const Signup = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate=useNavigate();
+ 
+  
+  
+ 
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,9 +33,22 @@ const Signup = () => {
       } 
     })
     const data = await response.json();
-    window.localStorage.token=data.token;
     
+    console.log(data);
+    if(!data.success){
+      localStorage.setItem('user', JSON.stringify(null));
+    }
+    else{
+      localStorage.setItem('user', JSON.stringify(data.user));
+    }
+    if(!data.success){
+      alert(data.message);
+      return;
+    }
+    navigate('/Home');
   };
+  
+  
 
   return (
     <div>
@@ -34,7 +56,7 @@ const Signup = () => {
     <div className="bg-gray-100 py-12 h-[50%] w-[50%] mx-auto my-24 drop-shadow-lg">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl md:text-4xl font-semibold text-center mb-8">Sign Up</h2>
-
+        
         <form onSubmit={handleSubmit} className="max-w-md mx-auto">
           <div className="mb-4">
             <label htmlFor="name" className="block text-gray-700 font-semibold mb-2">Name</label>
