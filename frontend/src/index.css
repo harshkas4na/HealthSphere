@@ -4,6 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 :root {
   --black-gradient: linear-gradient(
     144.39deg,
@@ -125,16 +126,26 @@
 }
 
 .blue__gradient {
-  background: linear-gradient(180deg, rgba(188, 165, 255, 0) 0%, #214d76 100%);
-  filter: blur(123px);
+  background: linear-gradient(to top left, rgba(188, 165, 255, 0) 0%, #214d76 100%);
+  /* filter: blur(123px); */
+}
+.blue__gradient2 {
+  background: linear-gradient(to top left, rgba(188, 165, 255, 0) 0%, #57a2e9 100%);
+  /* filter: blur(123px);
+  z-index: -12; */
+}
+.orange__gradient {
+  background: linear-gradient(180deg, rgba(223, 209, 14, 0) 0%, #df8208 100%);
+  /* filter: blur(123px); */
 }
 
 .pink__gradient {
-  background: linear-gradient(90deg, #f4c4f3 0%, #fc67fa 100%);
-  filter: blur(900px);
+  background: linear-gradient(90deg, #90b3a8 0%, #14b8f8 100%);
+  /* filter: blur(900px); */
 }
 
 .white__gradient {
   background: rgba(255, 255, 255, 0.6);
-  filter: blur(750px);
+  /* filter: blur(750px); */
 }
+

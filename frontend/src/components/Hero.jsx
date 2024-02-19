@@ -7,7 +7,7 @@ const Hero = () => {
       {/* Background image */}
       <div className="absolute inset-0 bg-black opacity-50"></div> {/* Overlay */}
       <img
-        src="/HeroImage.jpg"
+        src="/heroImage.jpg"
         alt="Background"
         className="absolute inset-0 object-cover w-full h-full blur-md"
       />
@@ -29,9 +29,9 @@ const Hero = () => {
         {/* Photo */}
         <div className="hidden md:block w-1/2">
           <img
-            src="/HeroImage.jpg"
+            src="/heroImage.jpg"
             alt="Photo"
-            className="object-cover w-[60%] h-[70%] rounded-md"
+            className="object-cover w-[80%] h-[70%] rounded-md"
           />
         </div>
       </div>

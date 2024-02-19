@@ -51,7 +51,7 @@ io.on('connection', (socket) => {
             await newTweet.save();
             // Broadcast the new tweet to all connected clients
             const tweeter=await User.findOne({_id:userId}).select('name');
-            console.log(tweeter);
+            
             const tweeterName=tweeter.name;
             const tweet_Id=newTweet._id;
             const tweetContent=newTweet.content;
@@ -62,36 +62,29 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('postComment', async (content) => {
-
-        // Get the tweet ID from the table of tweet
-        // const tweet = await Tweet.findOne({ user: userId });
-        // const tweetId = tweet._id;
-        // Assuming you have a Comment model and Mongoose set up
-        const newComment = new Comment({
-            user: content.userId, // Attach the user's ID who posted the comment
-            tweet: content.tweetId, // Attach the tweet ID  
-            content: content.content,
-            createdAt: new Date(),
-        });
-
-        try {
-
-            await newComment.save();
-            
-            // Broadcast the new comment to all connected clients
-            const commenter=await User.findOne({_id:content.userId}).select('name');
-            
-            const commenterName=commenter.name;
-            const tweetId=commenter._id;
-            
-
-            
-            io.emit('newComment', newComment.content,tweetId,commenterName);
-        } catch (error) {
-            console.error('Error saving comment:', error);
-        }
+    // Inside the 'postComment' socket event handler
+socket.on('postComment', async (content) => {
+    // Assuming you have a Comment model and Mongoose set up
+    const newComment = new Comment({
+      user: content.userId, // Attach the user's ID who posted the comment
+      tweet: content.tweetId, // Attach the tweet ID  
+      content: content.content,
+      createdAt: new Date(),
     });
+  
+    try {
+      await newComment.save();
+      // Broadcast the new comment to all connected clients
+      const commenter = await User.findOne({_id: content.userId}).select('name');
+      const commenterName = commenter.name;
+      const tweetId = content.tweetId;
+  
+      io.emit('newComment', newComment.content, tweetId, commenterName);
+    } catch (error) {
+      console.error('Error saving comment:', error);
+    }
+  });
+  
 });
 
 server.listen(3000, () => {

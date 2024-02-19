@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
-import ErrorPage from '../components/ErrorPage'// Import the ErrorPage component
+import ErrorPage from '../components/ErrorPage'; // Import the ErrorPage component
 import io from "socket.io-client";
 
 const CommunityPage = () => {
   const [socket, setSocket] = useState(null);
   const [tweetContent, setTweetContent] = useState("");
-  const [commentContent, setCommentContent] = useState("");
+  const [commentContents, setCommentContents] = useState({}); // Use an object to store comment content for each tweet
   const [userLoggedIn, setUserLoggedIn] = useState(false);
   const [tweets, setTweets] = useState([
-    {  tweet_Id: "1", tweetContent: "Did you know that regular exercise can reduce the risk of chronic diseases?",tweeterName:"ayanokji"},
-    { tweet_Id: "2", tweetContent: "Eating a balanced diet with plenty of fruits and vegetables is essential for good health.",tweeterName:"yuichi" },
-    {  tweet_Id: "3",tweetContent: "Getting enough sleep is crucial for overall well-being and mental health.",tweeterName:"yuta" }
+    { tweet_Id: "1", tweetContent: "Did you know that regular exercise can reduce the risk of chronic diseases?", tweeterName: "ayanokji" },
+    { tweet_Id: "2", tweetContent: "Eating a balanced diet with plenty of fruits and vegetables is essential for good health.", tweeterName: "yuichi" },
+    { tweet_Id: "3", tweetContent: "Getting enough sleep is crucial for overall well-being and mental health.", tweeterName: "yuta" }
   ]);
   const [comments, setComments] = useState({
-    "1": [{content:"That's really insightful! I try to exercise regularly to stay healthy.",commenterName:"yuichi"}],
-    "2": [{content:"I agree! Eating well is the foundation of good health.",commenterName:"yamcha"}],
-    "3": [{content:"Sleep is often overlooked, but it's so important for our bodies to recharge.",commenterName:"sungjun"}],
+    "1": [{content:"That's really insightful! I try to exercise regularly to stay healthy.", commenterName:"yuichi" }],
+    "2": [{content:"I agree! Eating well is the foundation of good health.", commenterName:"yamcha" }],
+    "3": [{content:"Sleep is often overlooked, but it's so important for our bodies to recharge.", commenterName:"sungjun" }],
   });
 
   useEffect(() => {
@@ -35,21 +35,30 @@ const CommunityPage = () => {
     socket.emit('postTweet', tweetContent, userId);
     setTweetContent("");
     socket.on('newTweet', (tweet_Id) => {
-      setTweets([...tweets,tweet_Id]);
+      setTweets([...tweets, tweet_Id]);
     });
   };
 
   const handlePostComment = (tweetId) => {
-    socket.emit('postComment', { content: commentContent, userId, tweetId });
-    setCommentContent("");
-    socket.on('newComment', (content, tweetId,commenterName) => {
-      setComments((prevComments) => ({
-        ...prevComments,
-        [tweetId]: [...(prevComments[tweetId] || []), { content, commenterName }],
-      }));
+    socket.emit('postComment', { content: commentContents[tweetId], userId, tweetId });
+    setCommentContents(prevContents => {
+      const updatedContents = { ...prevContents };
+      delete updatedContents[tweetId]; // Clear the comment content after posting
+      return updatedContents;
     });
   };
-
+  
+  useEffect(() => {
+    if (socket) {
+      socket.on('newComment', (content, tweetId, commenterName) => {
+        setComments((prevComments) => ({
+          ...prevComments,
+          [tweetId]: [...(prevComments[tweetId] || []), { content, commenterName }],
+        }));
+      });
+    }
+  }, [socket]);
+  
   if (!userLoggedIn) {
     return <ErrorPage />;
   }
@@ -58,7 +67,7 @@ const CommunityPage = () => {
   const userId = retrievedUser?._id;
 
   return (
-    <div>
+    <div className='white__gradient'>
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-semibold mb-4">Community</h1>
@@ -95,15 +104,19 @@ const CommunityPage = () => {
               <textarea
                 className="w-full border border-gray-300 rounded-md p-2 mb-2"
                 rows="2"
-                value={commentContent}
-                onChange={(e) => setCommentContent(e.target.value)}
+                value={commentContents[tweet?.tweet_Id] || ''} // Use the comment content from the object
+                onChange={(e) => setCommentContents(prevContents => ({
+                  ...prevContents,
+                  [tweet?.tweet_Id]: e.target.value,
+                }))}
                 placeholder="Add a comment..."
               ></textarea>
               <button onClick={() => handlePostComment(tweet.tweet_Id)} className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300">
                 Post
               </button>
             </div>
-          </div>
+            </div>
+          
         ))}
       </div>
     </div>

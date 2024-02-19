@@ -8,12 +8,20 @@ import Footer from '../components/Footer'
 
 const Home = () => {
   return (
-    <div>
+    <div className='blue__gradient2'>
       <Navbar />
       <Hero/>
+      <div className='w-full mx-auto my-24 '>
       <Testimonials/>
+      </div>
+      <div className='w-full mx-auto my-24 '>
+
       <Features/>
+      </div>
+      <div className='w-full mx-auto my-24 '>
       <FeedBackForm/>
+
+      </div>
       <Footer/>
     </div>
   )

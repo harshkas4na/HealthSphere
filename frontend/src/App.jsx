@@ -10,10 +10,8 @@ import Login from './Pages/Login';
 import PersonlizedDiet from './Pages/PersonlizedDiet';
 import Signup from './Pages/Signup';
 import Prediction from './Pages/Prediction';
-// import Error from './Pages/error'
 import YogaPage from './Pages/Yoga/frontend/src/YogaPage';
 import Yoga from './Pages/Yoga/frontend/src/pages/Yoga/Yoga';
-// import About from './Pages/Yoga/frontend/src/pages/About/About';
 import Tutorials from './Pages/Yoga/frontend/src/pages/Tutorials/Tutorials';
 
 
@@ -46,7 +44,6 @@ const App = () => {
           <Route path="/prediction" element={<Prediction/>}/>
           <Route path="/yoga" element={<YogaPage/>}/>
           <Route path='/start' element={<Yoga />} />
-          {/* <Route path='/about' element={<About />} /> */}
           <Route path='/tutorials' element={<Tutorials />} />
 
 
