@@ -1,54 +1,63 @@
-import React, { useState,useEffect } from 'react';
-import Navbar from '../components/Navbar';
-import ErrorPage from '../components/ErrorPage';
+import React, { useState } from "react";
+import axios from "axios";
+import Navbar from "../components/Navbar";
+import ErrorPage from "../components/ErrorPage";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const DietPlannerPage = () => {
-  // State for BMI calculator
-  const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
+  const [weight, setWeight] = useState("");
+  const [height, setHeight] = useState("");
   const [bmi, setBMI] = useState(null);
-
-  // Function to calculate BMI
-  const calculateBMI = () => {
-    const heightInMeters = height / 100;
-    const bmiValue = weight / (heightInMeters * heightInMeters);
-    setBMI(bmiValue.toFixed(2));
-  };
-
-  // State for user details form
   const [formData, setFormData] = useState({
-    name: '',
-    age: '',
-    diseases: '',
-    dietPreference: '',
-    goals: '',
+    name: "",
+    age: "",
+    weight: "",
+    height: "",
+    diseases: "",
+    dietPreference: "",
+    goals: "",
   });
+  const [apiData, setApiData] = useState([]);
+  const genAI = new GoogleGenerativeAI(
+    "AIzaSyCELRgk6tHlYgtm-jkU8KLGY23pdQkzzG0"
+  );
 
-  // Function to handle form input changes
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Function to handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle form submission logic (e.g., storing data)
-    console.log(formData);
+  const calculateBMI = () => {
+    setBMI(
+      (
+        Number(weight) /
+        ((Number(height) / 100) * (Number(height) / 100))
+      ).toFixed(2)
+    );
   };
-  const [userLoggedIn, setUserLoggedIn] = useState(false);
 
-  useEffect(() => {
-    const retrievedUser = JSON.parse(localStorage.getItem('user'));
-    if (retrievedUser) {
-      setUserLoggedIn(true);
-    } else {
-      setUserLoggedIn(false);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const prompt = `You are a nutritionist. You have to help a user to make a diet plan. Firstly greet him/her. Then: Write a diet plan for a user named ${formData.name} which has ${formData.weight} kg weight, ${formData.height} cm height, and is ${formData.age} years old. They have the following diseases: ${formData.diseases}. Their diet preference is ${formData.diet_preference}. Their goal is ${formData.goals}`;
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      setApiData(text);
+
+      setFormData({
+        name: "",
+        age: "",
+        weight: "",
+        height: "",
+        diseases: "",
+        dietPreference: "",
+        goals: "",
+      });
+    } catch (error) {
+      console.error("Error:", error);
     }
-  }, []);
-
-  if (!userLoggedIn) {
-    return <ErrorPage />; // Render ErrorPage component if user is not logged in
-  }
+  };
 
   return (
     <div>
@@ -57,10 +66,11 @@ const DietPlannerPage = () => {
         <h1 className="text-3xl font-semibold mb-4">Diet Planner</h1>
         <hr className="mb-4" />
 
-        {/* BMI Calculator */}
         <div className="mb-8">
           <div className="bg-gradient-to-r from-blue-400 to-purple-500 rounded-lg p-6">
-            <h2 className="text-white text-lg font-semibold mb-2">BMI Calculator</h2>
+            <h2 className="text-white text-lg font-semibold mb-2">
+              BMI Calculator
+            </h2>
             <div className="flex items-center mb-4">
               <input
                 type="number"
@@ -76,18 +86,27 @@ const DietPlannerPage = () => {
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
               />
-              <button onClick={calculateBMI} className="bg-white text-blue-500 py-2 px-4 rounded-md hover:bg-blue-100 transition duration-300">Calculate BMI</button>
+              <button
+                onClick={calculateBMI}
+                className="bg-white text-blue-500 py-2 px-4 rounded-md hover:bg-blue-100 transition duration-300"
+              >
+                Calculate BMI
+              </button>
             </div>
             {bmi && <p className="text-white">Your BMI: {bmi}</p>}
           </div>
         </div>
 
-        {/* User Details Form */}
         <div>
           <h2 className="text-2xl font-semibold mb-4">User Details</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label htmlFor="name" className="block text-gray-700 font-medium mb-1">Name:</label>
+              <label
+                htmlFor="name"
+                className="block text-gray-700 font-medium mb-1"
+              >
+                Name:
+              </label>
               <input
                 type="text"
                 id="name"
@@ -98,7 +117,12 @@ const DietPlannerPage = () => {
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="age" className="block text-gray-700 font-medium mb-1">Age:</label>
+              <label
+                htmlFor="age"
+                className="block text-gray-700 font-medium mb-1"
+              >
+                Age:
+              </label>
               <input
                 type="number"
                 id="age"
@@ -109,7 +133,44 @@ const DietPlannerPage = () => {
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="diseases" className="block text-gray-700 font-medium mb-1">Known Diseases:</label>
+              <label
+                htmlFor="weight"
+                className="block text-gray-700 font-medium mb-1"
+              >
+                Weight:
+              </label>
+              <input
+                type="number"
+                id="weight"
+                name="weight"
+                value={formData.weight}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none"
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="height"
+                className="block text-gray-700 font-medium mb-1"
+              >
+                Height:
+              </label>
+              <input
+                type="number"
+                id="height"
+                name="height"
+                value={formData.height}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none"
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="diseases"
+                className="block text-gray-700 font-medium mb-1"
+              >
+                Known Diseases:
+              </label>
               <input
                 type="text"
                 id="diseases"
@@ -120,7 +181,12 @@ const DietPlannerPage = () => {
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="dietPreference" className="block text-gray-700 font-medium mb-1">Diet Preference:</label>
+              <label
+                htmlFor="dietPreference"
+                className="block text-gray-700 font-medium mb-1"
+              >
+                Diet Preference:
+              </label>
               <input
                 type="text"
                 id="dietPreference"
@@ -131,22 +197,33 @@ const DietPlannerPage = () => {
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="goals" className="block text-gray-700 font-medium mb-1">Goals:</label>
+              <label
+                htmlFor="goals"
+                className="block text-gray-700 font-medium mb-1"
+              >
+                Goals:
+              </label>
               <textarea
                 id="goals"
                 name="goals"
                 value={formData.goals}
                 onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded-md py-2
-                px-3 focus:outline-none h-32"></textarea>
-                </div>
-                <button type="submit" className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300">Submit</button>
-              </form>
+                px-3 focus:outline-none h-32"
+              ></textarea>
             </div>
-          </div>
+            <button
+              type="submit"
+              className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
+            >
+              Submit
+            </button>
+          </form>
+          <div className=" ">{apiData}</div>
         </div>
-      );
-    }
-    
-    export default DietPlannerPage;
-    
+      </div>
+    </div>
+  );
+};
+
+export default DietPlannerPage;
