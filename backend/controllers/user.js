@@ -2,51 +2,41 @@ const User=require('../models/user');
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../config");
 
-async function handleLogin(req,res){
+const catchAsync=require('../utils/catchAsync');
+const AppError = require('../utils/appError');
+
+const signToken = id => {
+  return jwt.sign({ id }, JWT_SECRET, {
+    expiresIn: 3600,
+  });
+};
+
+
+exports.handleLogin=catchAsync(async (req,res,next)=>{
     const {email,password}=req.body;
-    const user=await User.findOne({email});
+    const user=await User.findOne({email}).select('+password');
     
+    //check if user exists and password is correct  
+    if (!user ||!(await user.correctPassword(password, user.password))) {
+      
+      return next(new AppError("Incorrect email or password", 401));
+    } 
 
-    if (user === null) {
-      return res.status(400).json({
-        success:false,
-        reason:"1",  //reason 1 is You Do not Have a account
-        message: "User not found.",
-      });
-    } else {
-      if (await user.validatePassword(password)) {
-        const userId = user._id;
-        const token = jwt.sign({
-          userId
-        }, JWT_SECRET);
-        return res.status(200).json({
-          success:true,
-          token: token,
-          user:user,
-          message: "User Successfully Logged In",
-        });
-      } else {
-        return res.status(400).json({
-          success:false,
-          reason:"2",  //reason 2 is You Entered Wrong Password
-          message: "Incorrect Password",
-        });
-      }
-    }
-}
+   //generate a token with user id and secret
+   const token=signToken(user._id);
+
+   res.status(200).json({
+       status:'success',
+       token
+   })
+    
+})
 
 
-async function handleRegister(req,res){
+exports.handleRegister=catchAsync(async(req,res)=>{
     const {name,email,password}=req.body;
 
-    const existingUser = await User.findOne({email})
-
-    if (existingUser) {
-        return res.status(411).json({
-            success:false,
-            message: "Email already taken"
-        })
-    }
+    // Check if user already exists
 
     const newUser = new User({
         name,
@@ -70,10 +60,8 @@ async function handleRegister(req,res){
       })
     
 
-}
+})
 
 
 
 
-
-module.exports={handleLogin,handleRegister}

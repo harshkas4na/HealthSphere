@@ -1,14 +1,27 @@
+
+
+
+// Libraries
 const http = require('http');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { Server } = require('socket.io');
-const { connectToDatabase } = require('./conn');
-const { router } = require('./routes/user');
+const dotenv = require('dotenv');
+// Custom modules
+
+const { AuthRouter } = require('./routes/user');
 const { checkForAuthentication } = require('./middlewares/user');
 const Comment = require('./models/comment');
 const Tweet = require('./models/tweet');
 const User = require('./models/user');
+const { connectToDatabase } = require('./conn');
+const AppError = require('./utils/appError');
+const globalErrorHandler = require('./controllers/errorController');
+
+
+// Server setup
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -16,19 +29,37 @@ const io = new Server(server, {
     origin: '*',
   }
 });
+app.use(cors());
+app.use(bodyParser.json());
+app.use(express.json());
+dotenv.config();    
 
+
+// Database connection
 connectToDatabase('mongodb://127.0.0.1:27017/healthsphere');
+// rx1dzIzEzreP02n0
 
-app.use(cors());
-app.use(bodyParser.json());
-app.use(express.json());
 
-app.use("/", checkForAuthentication, router);
-app.use(cors());
-app.use(bodyParser.json());
-app.use(express.json());
+// Routes
 
-app.use("/", checkForAuthentication, router);
+app.use("/", checkForAuthentication, AuthRouter);
+// app.use("/api/user", checkForAuthentication, UserRouter);
+
+
+// Error handling
+
+
+app.all('*', (req, res, next) => {
+  const err = new Error(`Can't find ${req.originalUrl} on this server!`);
+  err.status = 'fail';
+  err.statusCode = 404;
+
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+app.use(globalErrorHandler);
+
+
+// Socket.io setup
 
 io.on('connection', (socket) => {
     console.log('user connected', socket.id);
@@ -87,6 +118,19 @@ socket.on('postComment', async (content) => {
   
 });
 
+
+// Start the server
+
 server.listen(3000, () => {
     console.log('Server is running on port 3000');
 });
+
+
+process.on('unhandledRejection', (err) => {
+ console.log(err.name, err.message);
+  console.log('Unhandled Rejection! Shutting down the server...');
+  server.close(() => {
+    process.exit(1);
+  });
+}); 
+

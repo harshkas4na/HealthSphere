@@ -10,4 +10,4 @@ router
     .route('/register')
     .post(handleRegister)
 
-module.exports = {router};
+exports.AuthRouter = router;
